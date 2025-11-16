@@ -9,7 +9,7 @@ const channelInfoEl = $("channelInfo");
 const lastSampleInfoEl = $("lastSampleInfo");
 const controlsSection = $("controls");
 const logBody = $("logBody");
-const consoleEl = $("debugConsole");
+const debugConsole = $("debugConsole");
 
 const connectBtn = $("connectBtn");
 const disconnectBtn = $("disconnectBtn");
@@ -18,13 +18,12 @@ const autoToggleBtn = $("autoToggleBtn");
 const clearLogBtn = $("clearLogBtn");
 const intervalSelect = $("intervalSelect");
 const minDistanceSelect = $("minDistanceSelect");
-const debugConsole = $("minDistanceSelect");
 
 const wardriveChannelName = "#wardrive";
 
 function setStatus(text, color = null) {
   statusEl.textContent = text;
-  console.log(`status: ${text}`);
+  log(`status: ${text}`);
   if (color) {
     statusEl.className = "font-semibold " + color;
   }
@@ -33,7 +32,8 @@ function setStatus(text, color = null) {
 function log(msg) {
   const entry = document.createElement('pre');
   entry.textContent = msg;
-  debugConsole.appendChild(pre);
+  debugConsole.appendChild(entry);
+  console.log(msg);
 }
 
 // --- State ---
@@ -166,13 +166,13 @@ async function acquireWakeLock() {
     try {
       if ('wakeLock' in navigator) {
         state.wakeLock = await navigator.wakeLock.request('screen');
-        console.log('navigator.wakeLock acquired');
+        log('navigator.wakeLock acquired');
 
         state.wakeLock.addEventListener('release',
-          () => console.log('navigator.wakeLock released'));
+          () => log('navigator.wakeLock released'));
 
       } else {
-        console.log('navigator.wakeLock not supported');
+        log('navigator.wakeLock not supported');
       }
     } catch (err) {
       console.error(`Could not obtain wake lock: ${err.name}, ${err.message}`);
@@ -297,7 +297,7 @@ async function sendPing({ auto = false } = {}) {
     distanceMilesValue = haversineMiles(
       [state.lastSample.lat, state.lastSample.lon], [lat, lon]);
     if (distanceMilesValue < minMiles) {
-      console.log(`Min distance not met ${distanceMilesValue}, skipping.`);
+      log(`Min distance not met ${distanceMilesValue}, skipping.`);
       setStatus("Skipped ping", "font-semibold text-amber-300");
       addLogEntry({
         timestamp: new Date().toISOString(),
@@ -322,7 +322,7 @@ async function sendPing({ auto = false } = {}) {
     // Send mesh message: "<lat> <lon>".
     await state.connection.sendChannelTextMessage(channel.channelIdx, text);
     sentToMesh = true;
-    console.log("Sent MeshCore wardrive ping:", text);
+    log("Sent MeshCore wardrive ping:", text);
   } catch (e) {
     console.error("Mesh send failed", e);
     setStatus("Mesh send failed", "font-semibold text-red-300");
@@ -504,7 +504,7 @@ function onDisconnected() {
   state.connection = null;
   state.wardriveChannel = null;
 
-  console.log("Disconnected");
+  log("Disconnected");
   setStatus("Disconnected", "font-semibold text-red-300");
 }
 
@@ -564,6 +564,7 @@ if ('bluetooth' in navigator) {
 }
 
 export async function onLoad() {
+  log('Loading...');
   loadLog();
   updateLastSampleInfo();
   updateAutoButton();
