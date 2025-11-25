@@ -103,7 +103,7 @@ function escapeHtml(s) {
 }
 
 function coverageMarker(coverage) {
-  const [minLat, minLon, maxLat, maxLon] = geo.decode_bbox(coverage.id);
+  const [minLat, minLon, maxLat, maxLon] = geo.decode_bbox(coverage.hash);
   const color = coverage.heard > 0 ? '#398821' : '#E04748';
   const totalSamples = coverage.heard + coverage.lost;
   const heardRatio = coverage.heard / totalSamples;
@@ -119,7 +119,7 @@ function coverageMarker(coverage) {
     <strong>${coverage.id}</strong><br/>
     Heard: ${coverage.heard} Lost: ${coverage.lost} (${(100 * heardRatio).toFixed(0)}%)<br/>
     Updated: ${date.toLocaleString()}
-    ${coverage.paths.size === 0 ? '' : '<br/>Repeaters: ' + Array.from(coverage.paths).join(',')}`;
+    ${coverage.hitRepeaters.size === 0 ? '' : '<br/>Repeaters: ' + coverage.hitRepeaters.join(',')}`;
 
   rect.coverage = coverage;
   rect.bindPopup(details, { maxWidth: 320 });
@@ -299,9 +299,6 @@ function renderNodes(nodes) {
 
   // Add recent samples.
   nodes.samples.forEach(s => {
-    if (ageInDays(s.time) > 2)
-      return;
-
     sampleLayer.addLayer(sampleMarker(s));
   });
 
@@ -330,20 +327,26 @@ function buildIndexes(nodes) {
   idToRepeaters = new Map();
   edgeList = [];
 
-  // Build coverage items.
-  // TODO: service-side.
+  // Index coverage items.
+  nodes.coverage.forEach(c => {
+    const { latitude: lat, longitude: lon } = geo.decode(c.hash);
+    c.pos = [lat, lon];
+    hashToCoverage.set(c.hash, c);
+  });
+
+  // Add samples to coverage items.
+  // TODO: shared helper for coverage ctor.
   nodes.samples.forEach(s => {
     const key = s.hash.substring(0, 6);
     let coverage = hashToCoverage.get(key);
     if (!coverage) {
       const { latitude: lat, longitude: lon } = geo.decode(key);
       coverage = {
-        id: key,
+        hash: key,
         pos: [lat, lon],
         heard: 0,
         lost: 0,
-        time: 0,
-        paths: new Set(),
+        lastHeard: 0,
         hitRepeaters: [],
       };
       hashToCoverage.set(key, coverage);
@@ -352,8 +355,11 @@ function buildIndexes(nodes) {
     const heard = s.path.length > 0;
     coverage.heard += heard ? 1 : 0;
     coverage.lost += !heard ? 1 : 0;
-    coverage.time = Math.max(coverage.time, s.time);
-    s.path.forEach(p => coverage.paths.add(p));
+    coverage.lastHeard = Math.max(coverage.lastHeard, s.time);
+    s.path.forEach(p => {
+      if (!coverage.hitRepeaters.includes(p))
+        coverage.hitRepeaters.push(p);
+    });
   });
 
   // Index repeaters.
@@ -365,14 +371,13 @@ function buildIndexes(nodes) {
 
   // Build connections.
   hashToCoverage.entries().forEach(([key, coverage]) => {
-    coverage.paths.forEach(p => {
-      const candidateRepeaters = idToRepeaters.get(p);
+    coverage.hitRepeaters.forEach(r => {
+      const candidateRepeaters = idToRepeaters.get(r);
       if (candidateRepeaters === undefined)
         return;
 
       const bestRepeater = getBestRepeater(coverage.pos, candidateRepeaters);
       bestRepeater.hitBy.push(coverage);
-      coverage.hitRepeaters.push(bestRepeater);
       edgeList.push({ repeater: bestRepeater, coverage: coverage });
     });
   });

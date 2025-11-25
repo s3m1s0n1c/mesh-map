@@ -1,4 +1,5 @@
 import { parseLocation } from '../content/shared.js'
+// TODO: move to geohash
 
 async function getElevation(lat, lon) {
   try {
