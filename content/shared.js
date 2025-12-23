@@ -1161,6 +1161,13 @@ function fadeColor(color, amount) {
   const v2 = c2.toHsv().v;
   return c2.desaturate(amount).lighten(amount * (1 - v2 / 255)).toHex();
 }
+function toHex(num) {
+  if (num == null) return num;
+  let numStr = num.toString(16);
+  if (numStr.length % 2)
+    numStr = numStr.padStart(numStr.length + 1, "0");
+  return numStr;
+}
 var export_aes = import_aes_js.default;
 var export_geo = import_ngeohash.default;
 export {
@@ -1185,6 +1192,7 @@ export {
   retry,
   sampleKey,
   sigmoid,
+  toHex,
   truncateTime
 };
 /*! Bundled license information:

@@ -14,7 +14,8 @@ import {
   isValidLocation,
   maxDistanceMiles,
   posFromHash,
-  sampleKey
+  sampleKey,
+  toHex
 } from "/content/shared.js";
 
 // --- DOM helpers ---
@@ -806,9 +807,9 @@ function onLogRxData(frame) {
     return;
 
   // First repeater (ignoring mobile repeater).
-  let firstRepeater = packet.path[0].toString(16);
+  let firstRepeater = toHex(packet.path[0]);
   if (firstRepeater === state.ignoredId) {
-    firstRepeater = packet.path[1]?.toString(16);
+    firstRepeater = toHex(packet.path[1]);
     hitMobileRepeater = true;
   }
 

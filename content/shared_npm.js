@@ -151,3 +151,12 @@ export function fadeColor(color, amount) {
   const v = c.toHsv().v;
   return c.desaturate(amount).lighten(amount * (1 - (v / 255))).toHex();
 }
+
+export function toHex(num) {
+  if (num == null) return num; // Nullish
+
+  let numStr = num.toString(16);
+  if (numStr.length % 2)
+    numStr = numStr.padStart(numStr.length + 1, "0");
+  return numStr;
+}
