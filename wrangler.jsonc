@@ -1,6 +1,6 @@
 {
     "$schema": "./node_modules/wrangler/config-schema.json",
-    "name": "mesh-map",
+    "name": "sydney-mesh-map",
     "pages_build_output_dir": ".",
     "compatibility_date": "2025-11-05",
     "compatibility_flags": [
