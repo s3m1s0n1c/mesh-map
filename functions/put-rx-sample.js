@@ -29,7 +29,7 @@ export async function onRequest(context) {
       ON CONFLICT(hash) DO UPDATE SET
         time = excluded.time,
         samples = (
-          SELECT json_group_array(value) FROM (
+          SELECT json_group_array(json(value)) FROM (
             SELECT
               v AS value,
               CAST(json_extract(v, '$.time') AS INTEGER) AS t
