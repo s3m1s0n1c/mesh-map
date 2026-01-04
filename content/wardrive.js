@@ -588,11 +588,6 @@ async function sendPing({ auto = false } = {}) {
   if (state.ignoredId !== null) text += ` ${state.ignoredId}`;
 
   try {
-    // Removed: data is cheap this helps fill the RxLog map.
-    // // Don't need to send an rx-sample for this tile because
-    // // this sends a normal sample with the same data.
-    // pushRxHistory(tileId);
-
     // Send mesh message: "<lat> <lon> [<id>]".
     await state.connection.sendChannelTextMessage(state.channel.channelIdx, text);
     log("Sent MeshCore wardrive ping:", text);
@@ -842,11 +837,11 @@ function blinkRxLog() {
   });
 }
 
-function pushRxHistory(hash) {
+function pushRxHistory(key) {
   // Add and keep the most recent 10. This goal is to prevent the
   // client from spamming a single tile, but also allow it to
   // eventually submit new samples after moving or refreshing.
-  state.rxHistory.push(hash);
+  state.rxHistory.push(key);
   state.rxHistory = state.rxHistory.slice(-10);
 }
 
@@ -867,9 +862,11 @@ async function trySendRxSample(repeater, lastSnr, lastRssi) {
     return;
   }
   const hash = geohash6(lat, lon);
+  // Track history per (tile hash, repeater id).
+  const historyKey = `${hash}#${repeater}`;
 
   // Does this tile need a sample?
-  if (state.rxHistory.includes(hash))
+  if (state.rxHistory.includes(historyKey))
     return;
 
   // Send sample to service.
@@ -893,7 +890,7 @@ async function trySendRxSample(repeater, lastSnr, lastRssi) {
       body: dataStr,
     });
 
-    pushRxHistory(hash);
+    pushRxHistory(historyKey);
   } catch (e) {
     console.error("RxSample: Service POST failed", e);
   }
