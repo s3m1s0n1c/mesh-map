@@ -1053,8 +1053,8 @@ var w = function(r2) {
 };
 
 // content/shared_npm.js
-var centerPos = [47.6205, -122.3494];
-var maxDistanceMiles = 150;
+var centerPos = [-33.86882, 151.20929];
+var maxDistanceMiles = 200;
 var dayInMillis = 24 * 60 * 60 * 1e3;
 var TIME_TRUNCATION = 1e5;
 var MAX_VALID_RSSI = -31;
