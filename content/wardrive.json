@@ -1,6 +1,6 @@
 {
-  "name": "MeshCore Wardrive",
-  "short_name": "MC Map",
+  "name": "NSWMESH - MeshCore Wardrive",
+  "short_name": "NSW MESH MC Map",
   "start_url": "/waredrive.html",
   "display": "standalone",
   "background_color": "#ffffff",
