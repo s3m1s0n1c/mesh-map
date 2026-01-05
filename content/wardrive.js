@@ -36,9 +36,9 @@ const rxLogStatusEl = $("rxLogStatus");
 // Channel key is derived from the channel hashtag.
 // Channel hash is derived from the channel key.
 // If you change the channel name, these must be recomputed.
-const wardriveChannelHash = parseInt("e0", 16);
-const wardriveChannelKey = BufferUtils.hexToBytes("4076c315c1ef385fa93f066027320fe5");
-const wardriveChannelName = "#wardrive";
+const wardriveChannelHash = parseInt("fd", 16);
+const wardriveChannelKey = BufferUtils.hexToBytes("5cc0ffd9a3df93d7ac11723f6aa1cb51");
+const wardriveChannelName = "#welovewardriving";
 const refreshTileAge = 1; // Tiles older than this (days) will get pinged again.
 
 // --- Global Init ---
